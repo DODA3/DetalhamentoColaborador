@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planilha de Funcionários - Agosto 2026</title>
+<style>
+  :root {
+    --primary: #2D2D2D;
+    --light: #E5E5E5;
+    --accent: #4A90D9;
+    --header-bg: #1B2A4A;
+    --row-zebra: #F7F9FC;
+    --positive: #009900;
+    --negative: #CC0000;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+    background: #F5F5F5;
+    color: #333;
+    padding: 20px;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--header-bg), #2D3748);
+    color: #fff;
+    padding: 28px 32px;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .header .meta {
+    font-size: 13px;
+    color: #B0BEC5;
+    font-style: italic;
+  }
+  .controls {
+    background: #fff;
+    padding: 14px 24px;
+    border-bottom: 1px solid #E0E0E0;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .controls label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+  }
+  .controls select, .controls input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+  }
+  .controls select:focus, .controls input:focus {
+    border-color: var(--accent);
+  }
+  .controls input {
+    width: 200px;
+  }
+  .stats {
+    background: #fff;
+    padding: 12px 24px;
+    border-bottom: 1px solid #E0E0E0;
+    font-size: 12px;
+    color: #888;
+  }
+  .table-wrap {
+    background: #fff;
+    overflow-x: auto;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  thead th {
+    background: var(--header-bg);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    position: sticky;
+    top: 0;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  thead th:hover {
+    background: #34495E;
+  }
+  thead th .sort-arrow {
+    margin-left: 4px;
+    opacity: 0.4;
+  }
+  thead th.sorted .sort-arrow {
+    opacity: 1;
+  }
+  tbody tr {
+    border-bottom: 1px solid #EAEAEA;
+    transition: background 0.15s;
+  }
+  tbody tr:nth-child(even) {
+    background: var(--row-zebra);
+  }
+  tbody tr:hover {
+    background: #E8F0FE;
+  }
+  tbody td {
+    padding: 10px 14px;
+  }
+  tbody td.num {
+    text-align: right;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+  }
+  tbody td.currency {
+    text-align: right;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+  }
+  .loja-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    text-align: center;
+    line-height: 28px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 16px;
+    background: #fff;
+  }
+  .pagination button {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .pagination button:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .pagination button.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .pagination button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  @media (max-width: 768px) {
+    body { padding: 10px; }
+    .header { padding: 18px; }
+    .header h1 { font-size: 18px; }
+    .controls { padding: 10px 16px; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 Planilha de Funcionários</h1>
+  <div class="meta">Período: Agosto 2026 &nbsp;|&nbsp; 178 registros &nbsp;|&nbsp; 3 lojas</div>
+</div>
+
+<div class="controls">
+  <label>Loja:</label>
+  <select id="filterLoja" onchange="applyFilters()">
+    <option value="">Todas</option>
+    <option value="1">Loja 1</option>
+    <option value="2">Loja 2</option>
+    <option value="3">Loja 3</option>
+  </select>
+  <label>Função:</label>
+  <select id="filterFuncao" onchange="applyFilters()">
+    <option value="">Todas</option>
+  </select>
+  <label>Buscar:</label>
+  <input type="text" id="searchInput" placeholder="Nome, CPF, função..." oninput="applyFilters()" />
+  <label>Linhas/pág:</label>
+  <select id="pageSize" onchange="applyFilters()">
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="200">200</option>
+  </select>
+</div>
+
+<div class="stats" id="statsBar"></div>
+
+<div class="table-wrap">
+  <table id="mainTable">
+    <thead><tr id="headerRow"></tr></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+const columns = ["Loja", "Funcionário", "CPF", "Função", "Mês", "Ano", "Total Proventos (R$)", "INSS 27,30% (R$)", "Valor FGTS (R$)", "Total Horas Extras (R$)", "Pic Pay Mensal", "Pic Pay Compra de Folga", "Pic Pay Assiduidade", "Convênio Parte Empresa", "Vale Transporte Urbes", "Faturamento"];
+const allRows = [[3, "ALLISSON HENRIQUE PEREIRA", "539.636.128-00", "ASSISTENTE ADM", "Agosto", 2026, 2583.01, 705.1617300000001, 206.64, 144.48, 770.0, 400.0, 80.0, 145.0, "-", 1998800.02], [2, "ADRIANA MURARO", "203.313.138-63", "OPERADOR DE CAIXA", "Agosto", 2026, 2242.98, 265.48977, 108.91, 3.97, 408.0, 150.0, 0.0, 0.0, "-", 2204782.56], [2, "ALANA BORTOLLI", "036.497.828-71", "OPERADOR DE CAIXA", "Agosto", 2026, 2876.26, 785.2189800000001, 230.1, 542.95, 425.0, 300.0, 80.0, 0.0, "-", 2204782.56], [3, "AMANDA ISABELI REIS JULIAO", "525.643.118-81", "BALCONISTA DE PADARIA II", "Agosto", 2026, 2420.29, 636.40668, 186.49, 229.29999999999998, 425.0, 0.0, 0.0, 145.0, "-", 1998800.02], [2, "ANA CAROLINE VILAS BOAS DE ALMEIDA CARDOSO", "432.547.098-02", "BALCONISTA DE PADARIA II", "Agosto", 2026, 2466.42, 672.7648200000001, 197.14, 391.41999999999996, 425.0, 0.0, 0.0, 0.0, "-", 2204782.56], [2, "ANTONIO CARLOS DE ALMEIDA NETO", "544.425.048-90", "OPERADOR DE LOJA II", "Agosto", 2026, 2263.32, 604.4766, 177.13, 49.61, 391.0, 0.0, 0.0, 0.0, 369.4, 2204782.56], [3, "AMANDA MAISE FERREIRA FOGAÇA", "410.860.338-92", "OPERADOR DE CAIXA", "Agosto", 2026, 2358.57, 642.2270400000001, 188.19, 25.57, 425.0, 150.0, 0.0, 0.0, "-", 1998800.02], [3, "LILIAN THAIS SILVA", "521.361.108-70", "OPERADOR DE CAIXA", "Agosto", 2026, 2622.09, 715.8305700000001, 209.76, 288.78, 425.0, 0.0, 80.0, 0.0, 352.6, 1998800.02], [2, "ARIANE MAESANO GUIMIL", "379.574.968-90", "OPERADOR DE CAIXA", "Agosto", 2026, 2333.31, 636.99363, 186.66, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2204782.56], [3, "KATE DAMIELE DOS ANJOS PEIXOTO MEDEIROS", "355.692.428-56", "OPERADOR DE LOJA I", "Agosto", 2026, 2299.55, 623.9660700000001, 182.84, 224.55, 544.0, 68.0, 80.0, 0.0, 369.4, 1998800.02], [2, "BIANCA GIOVANNA VESMA SILVA", "479.264.618-90", "OPERADOR DE LOJA II", "Agosto", 2026, 2407.61, 655.38018, 192.05, 224.45, 408.0, 150.0, 0.0, 0.0, 352.6, 2204782.56], [3, "ANA LAURA GARCIA LOPES", "461.814.648-67", "BALCONISTA DE PADARIA I ", "Agosto", 2026, 2743.57, 94.41159, 27.66, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 1998800.02], [2, "DAIANE OLIVEIRA DA COSTA", "454.007.708-27", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2267.16, 0.0, 181.37, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2204782.56], [2, "DELZIRA ZAMPIERI", "764.083.029-04", "OPERADOR DE CAIXA", "Agosto", 2026, 2361.19, 644.6048700000001, 188.89, 28.19, 425.0, 0.0, 80.0, 0.0, "-", 2204782.56], [3, "APARECIDO ANTONIO VIEIRA", "110.313.468-05", "ACOUGUEIRO I", "Agosto", 2026, 3165.7, 864.2361, 253.25, 617.72, 619.0, 150.0, 200.0, 0.0, "-", 1998800.02], [2, "LUCAS ALEXANDRE ANANIAS BRANCO", "544.252.018-76", "CONFERENTE", "Agosto", 2026, 2714.46, 734.70306, 215.29, 65.7, 425.0, 0.0, 80.0, 0.0, 369.4, 2204782.56], [2, "DULCINEIA MORATO FRANCA DE OLIVEIRA", "336.160.678-04", "ENCARREGADO DE PADARIA", "Agosto", 2026, 2886.32, 783.8812800000001, 229.7, 447.79, 725.0, 100.0, 80.0, 145.0, "-", 2204782.56], [2, "LIDIANE CRISTINA CARLOS DE LIMA", "303.963.888-25", "ACOUGUEIRO I", "Agosto", 2026, 2792.01, 687.40035, 201.43, 244.03000000000006, 357.0, 0.0, 200.0, 0.0, 369.4, 2204782.56], [2, "EDMILSON PEREIRA", "122.713.428-21", "CONFERENTE", "Agosto", 2026, 2664.77, 727.48221, 213.18, 16.01, 795.0, 0.0, 80.0, 145.0, "-", 2204782.56], [2, "EZEQUIEL GOMES DA SILVA", "435.608.038-61", "OPERADOR DE LOJA II", "Agosto", 2026, 2354.68, 603.00513, 176.7, 171.53, 425.0, 0.0, 0.0, 0.0, 369.4, 2204782.56], [3, "ARTHUR DE MORAIS SOARES", "243.713.158-28", "OPERADOR DE CAIXA", "Agosto", 2026, 2634.68, 719.26764, 210.77, 301.37, 425.0, 0.0, 80.0, 0.0, "-", 1998800.02], [2, "GABRIEL SANTOS ANJOS", "508.581.168-20", "OPERADOR DE LOJA II", "Agosto", 2026, 2255.02, 597.41409, 175.06, 71.86, 391.0, 0.0, 0.0, 0.0, 369.4, 2204782.56], [2, "ELLEN HIROKO ABE", "177.452.048-60", "OPERADOR DE CAIXA", "Agosto", 2026, 2680.47, 731.76831, 214.43, 347.47, 425.0, 0.0, 80.0, 145.0, "-", 2204782.56], [2, "EMILLY IVONE SCOMPARIM MENDES", "384.712.638-58", "FISCAL DE CAIXA", "Agosto", 2026, 2803.44, 746.14176, 218.64, 238.84, 995.0, 450.0, 0.0, 0.0, "-", 2204782.56], [3, "BRUNA MELO DA LUZ", "118.665.989-02", "OPERADOR DE LOJA I", "Agosto", 2026, 2260.01, 373.80798, 109.54, 0.0, 391.0, 0.0, 0.0, 0.0, "-", 1998800.02], [2, "MONIQUE CAROLINA GONCALVES MARQUES", "530.742.518-08", "OPERADOR DE CAIXA", "Agosto", 2026, 2531.25, 690.33783, 202.29, 197.94, 425.0, 150.0, 0.0, 145.0, 352.6, 2204782.56], [2, "ERIK DE OLIVEIRA", "438.934.518-46", "ASSISTENTE DE PREVENCAO", "Agosto", 2026, 2593.85, 708.1210500000001, 207.5, 327.60999999999996, 789.0, 0.0, 80.0, 0.0, "-", 2204782.56], [2, "YASMIN COSTAMILAN CRISPIM", "468.461.798-01", "OPERADOR DE LOJA II", "Agosto", 2026, 2756.69, 752.5763700000001, 220.53, 472.53000000000003, 425.0, 300.0, 80.0, 0.0, 369.4, 2204782.56], [3, "CARMEM LUCIA VIANA", "169.480.528-00", "OPERADOR DE CAIXA", "Agosto", 2026, 3539.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 1998800.02], [3, "VITORIA APARECIDA GONCALVES ROSA", "346.765.248-46", "ASSISTENTE DE PREVENCAO", "Agosto", 2026, 2463.6, 0.0, 0.0, 63.42, 608.0, 0.0, 0.0, 145.0, 369.4, 1998800.02], [2, "FABIO CUNHA CATANANTE", "463.562.918-00", "OPERADOR DE LOJA II", "Agosto", 2026, 2551.33, 695.37468, 203.77, 368.16999999999996, 425.0, 0.0, 0.0, 0.0, 352.6, 2204782.56], [2, "FELIPE RENATO DE ARAUJO SIQUEIRA", "377.733.868-03", "OPERADOR DE CAIXA", "Agosto", 2026, 1693.54, 225.86655, 66.18, 11.3, 425.0, 0.0, 0.0, 0.0, 369.4, 2204782.56], [3, "CIRLENE BARBOSA REIS JULIAO", "287.489.578-44", "ENCARREGADO DE PADARIA", "Agosto", 2026, 3150.1, 859.9773, 252.0, 711.57, 725.0, 300.0, 80.0, 145.0, "-", 1998800.02], [2, "ROBERTO HENRIQUE DOS SANTOS", "464.187.608-83", "ACOUGUEIRO I", "Agosto", 2026, 2818.18, 769.36314, 225.45, 270.27, 425.0, 0.0, 280.0, 0.0, 369.4, 2204782.56], [2, "FRANCIELE GONCALVES DE OLIVEIRA SANTOS", "436.292.488-45", "AUXILIAR DE CONFEITEIRO", "Agosto", 2026, 2804.15, 765.53295, 224.33, 510.76, 625.0, 150.0, 80.0, 0.0, "-", 2204782.56], [2, "MATHEUS BORBA JOFRE", "499.397.888-00", "OPERADOR DE LOJA I", "Agosto", 2026, 2418.75, 650.9193600000001, 190.74, 343.75, 425.0, 150.0, 0.0, 0.0, 369.4, 2204782.56], [3, "CRISTIANE MARTINHO AYRES BUENO", "357.495.568-59", "FISCAL DE CAIXA", "Agosto", 2026, 3026.28, 826.1744400000001, 242.1, 461.68, 408.0, 150.0, 0.0, 0.0, "-", 1998800.02], [2, "GABRIEL VITOR POSSARLE", "449.015.748-76", "OPERADOR DE CAIXA", "Agosto", 2026, 2541.68, 683.43639, 200.27, 208.68, 425.0, 0.0, 80.0, 0.0, "-", 2204782.56], [2, "GUSTAVO HENRIQUE DE MELO CASACURTA", "430.990.208-18", "BALCONISTA DE ACOUGUE I", "Agosto", 2026, 2245.98, 595.25739, 174.43, 170.98, 425.0, 150.0, 280.0, 0.0, "-", 2204782.56], [2, "MARIA EDUARDA NUNES DE SOUZA", "573.156.218-06", "OPERADOR DE CAIXA", "Agosto", 2026, 2531.77, 681.28515, 199.64, 198.76999999999998, 425.0, 300.0, 0.0, 0.0, 369.4, 2204782.56], [3, "FABIANE SILVA TEIXEIRA", "499.347.398-28", "OPERADOR DE CAIXA", "Agosto", 2026, 2120.57, 161.25837, 47.24, 16.44, 425.0, 0.0, 0.0, 0.0, "-", 1998800.02], [2, "ISABEL CRISTINA BORDIGNON GERALDO CRUZ", "589.921.488-01", "OPERADOR DE CAIXA", "Agosto", 2026, 2535.73, 691.47897, 202.63, 202.42, 425.0, 0.0, 80.0, 0.0, "-", 2204782.56], [2, "JENNIFER STEFANNY SILVA", "550.347.968-80", "OPERADOR DE CAIXA", "Agosto", 2026, 2528.93, 685.68864, 200.93, 195.62, 425.0, 252.0, 0.0, 0.0, "-", 2204782.56], [2, "KAUAN HENRIQUE MOREIRA DOS SANTOS", "461.712.358-06", "OPERADOR DE LOJA II", "Agosto", 2026, 2250.79, 606.69063, 177.78, 175.78999999999996, 408.0, 150.0, 0.0, 0.0, "-", 2204782.56], [3, "GABRIEL HENRIQUE REIS JULIAO", "586.789.858-01", "OPERADOR DE LOJA I", "Agosto", 2026, 3066.69, 613.3463700000001, 179.73, 171.69, 425.0, 150.0, 80.0, 0.0, "-", 1998800.02], [2, "KLAYTONN FERNANDO RODRIGUES FERREIRA", "562.581.538-01", "SUB ENCARREGADO HORTIFRUTI", "Agosto", 2026, 3221.25, 874.78209, 256.34, 562.65, 425.0, 150.0, 0.0, 0.0, "-", 2204782.56], [2, "LAUREN CORDEIRO DE JESUS CIPRIANO", "461.279.048-03", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2313.25, 629.32779, 184.41, 238.25, 425.0, 0.0, 80.0, 0.0, 426.05, 2204782.56], [3, "HANNA CAROLINE JESUS DOS SANTOS", "109.201.715-16", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2412.63, 650.5890300000001, 190.64, 337.63, 425.0, 100.0, 80.0, 145.0, "-", 1998800.02], [2, "LAUREN STEFANY PEREIRA RODRIGUES", "484.013.268-26", "OPERADOR DE CAIXA", "Agosto", 2026, 2551.04, 690.2832300000001, 202.28, 185.02999999999994, 425.0, 150.0, 0.0, 0.0, "-", 2204782.56], [2, "LEONARDO TARRAGA CAMPOS", "141.525.894-50", "BALCONISTA DE ACOUGUE III", "Agosto", 2026, 2786.25, 760.64625, 222.9, 603.1, 425.0, 0.0, 280.0, 0.0, "-", 2204782.56], [3, "HELSON ELIAS DA SILVA", "271.175.698-08", "ACOUGUEIRO I", "Agosto", 2026, 2120.19, 333.80256, 97.81, 22.68, 408.0, 0.0, 200.0, 0.0, "-", 1998800.02], [3, "JESSICA RANGELI DA SILVA", "061.325.193-86", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2154.53, 587.4141, 172.13, 79.53, 425.0, 0.0, 80.0, 0.0, "-", 1998800.02], [2, "LUCIANA FERREIRA", "307.934.158-96", "OPERADOR DE CAIXA", "Agosto", 2026, 2416.13, 655.3665300000001, 192.04, 83.13, 391.0, 0.0, 0.0, 0.0, "-", 2204782.56], [2, "LUCILENE GRAZIELE DA SILVA MESSIAS", "519.614.678-44", "FISCAL DE CAIXA", "Agosto", 2026, 2966.35, 807.6131700000001, 236.66, 401.74999999999994, 625.0, 0.0, 80.0, 145.0, "-", 2204782.56], [3, "KAUAN DO ROSARIO SILVA SANTANA", "120.174.595-00", "OPERADOR DE LOJA III", "Agosto", 2026, 2572.42, 701.5417500000001, 205.58, 221.14999999999998, 425.0, 150.0, 80.0, 0.0, "-", 1998800.02], [2, "RAPHAEL MORAES DE LIMA", "409.319.938-81", "OPERADOR DE CAIXA", "Agosto", 2026, 3962.08, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2204782.56], [3, "KAWANE COSTA DO NASCIMENTO", "509.651.008-55", "OPERADOR DE CAIXA", "Agosto", 2026, 3066.81, 338.8203, 107.35, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 1998800.02], [2, "ROSALIA KATSUE FUKUYAMA TAKAYANAGI", "106.025.108-64", "OPERADOR DE CAIXA", "Agosto", 2026, 2619.43, 715.10439, 209.55, 286.42999999999995, 425.0, 0.0, 80.0, 0.0, "-", 2204782.56], [2, "VIVIANE VILLELA DA SILVA", "149.688.908-85", "OPERADOR DE CAIXA", "Agosto", 2026, 2375.67, 648.0583200000001, 189.9, 42.669999999999995, 425.0, 0.0, 80.0, 0.0, "-", 2204782.56], [3, "MANOEL KAUA PONTES MARTINS", "552.190.238-45", "OPERADOR DE LOJA I", "Agosto", 2026, 2613.56, 694.61847, 203.55, 538.56, 408.0, 0.0, 0.0, 0.0, "-", 1998800.02], [3, "MARCOS PAULO MANOEL DE MELO", "408.961.278-00", "OPERADOR DE LOJA I", "Agosto", 2026, 555.23, 151.57779, 44.41, 278.56, 0.0, 425.0, 0.0, 0.0, "-", 1998800.02], [3, "MARIA JULIA MORENO BERMONTE", "545.262.538-04", "OPERADOR DE CAIXA", "Agosto", 2026, 2616.56, 714.32088, 209.32, 283.25, 425.0, 0.0, 80.0, 145.0, "-", 1998800.02], [3, "MARIELY GONCALVES", "622.868.273-38", "OPERADOR DE CAIXA", "Agosto", 2026, 2360.17, 624.01521, 182.86, 27.17, 391.0, 150.0, 0.0, 0.0, "-", 1998800.02], [3, "MILENE DIAS TARDELLI", "463.383.468-19", "BALCONISTA DE ACOUGUE III", "Agosto", 2026, 2538.12, 670.29417, 196.42, 186.86, 425.0, 150.0, 200.0, 0.0, "-", 1998800.02], [3, "PAULO VICTOR DA SILVA ASSIS PANTOJA", "031.577.422-30", "OPERADOR DE LOJA I", "Agosto", 2026, 612.77, 167.28621, 49.02, 336.1, 408.0, 150.0, 0.0, "-", "-", 1998800.02], [3, "DANIELLE ROSA DE CAMPOS", "337.285.358-00", "ENCARREGADO DE AÇOUGUE", "Agosto", 2026, 4558.94, 0.0, 364.71, 398.64, 795.0, 300.0, 280.0, 0.0, "-", 1998800.02], [3, "REGIANE CRISTINA SOARES", "160.087.918-78", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2540.35, 693.5155500000001, 203.22, 465.34999999999997, 795.0, 300.0, 80.0, 145.0, "-", 1998800.02], [3, "SARAH BEATRIZ DE CAMPOS CAVALCANTI", "496.736.978-25", "OPERADOR DE LOJA III", "Agosto", 2026, 2922.47, 793.3107000000001, 232.47, 470.2, 425.0, 0.0, 0.0, 145.0, "-", 1998800.02], [3, "JOSIANE PATRICIA DE OLIVEIRA", "325.459.358-83", "OPERADOR DE CAIXA", "Agosto", 2026, 2333.0, 0.0, 0.0, 203.71, 425.0, 0.0, 80.0, 0.0, "-", 1998800.02], [3, "SILAS DOS SANTOS ALVARENGA", "351.973.128-23", "BALCONISTA DE ACOUGUE I", "Agosto", 2026, 2269.0, 580.42803, 170.08, 194.0, 795.0, 450.0, 200.0, 0.0, "-", 1998800.02], [3, "VICTORIA COSTAMILAN CRISPIM", "468.461.988-57", "OPERADOR DE LOJA III", "Agosto", 2026, 3032.89, 827.97897, 242.63, 580.62, 425.0, 0.0, 80.0, 145.0, "-", 1998800.02], [3, "VINICIUS RODRIGUES DE SOUZA", "571.826.628-09", "OPERADOR DE LOJA II", "Agosto", 2026, 2329.03, 628.0501500000001, 184.04, 254.02999999999997, 795.0, 150.0, 0.0, 0.0, "-", 1998800.02], [2, "EDUARDA FRANCINE DOS SANTOS", "500.150.948-39", "BALCONISTA DE PADARIA I", "Agosto", 2026, 814.31, 222.30663, 65.14, 53.48, 357.0, 150.0, 0.0, "-", "-", 2204782.56], [2, "ALESSANDRO CRAVO DE ALELUIA", "283.435.878-80", "MOTORISTA", "Agosto", 2026, 3035.4, 0.0, 242.83, 700.5400000000001, 770.0, 0.0, 80.0, 145.0, "-", 2204782.56], [1, "ALESSANDRO YUICHI HONMA", "393.821.478-37", "ACOUGUEIRO I", "Agosto", 2026, 2786.88, 0.0, 213.61, 212.7, 795.0, 0.0, 200.0, 145.0, "-", 2795565.22], [2, "ALEXANDRE DA PALMA BRANCO", "289.399.458-08", "ENCARREGADO LOJA", "Agosto", 2026, 3403.18, 0.0, 272.25, 581.6099999999999, 870.0, 300.0, 80.0, 145.0, "-", 2204782.56], [2, "ALEXANDRE PEREIRA DUARTE", "474.587.618-14", "ENCARREGADO LOJA", "Agosto", 2026, 3688.17, 0.0, 295.05, 866.6, 870.0, 0.0, 80.0, 0.0, "-", 2204782.56], [1, "ANDERSON JUNIOR DOS SANTOS LUZ", "526.369.038-01", "CONFERENTE", "Agosto", 2026, 3211.78, 876.8159400000001, 256.94, 563.02, 425.0, 150.0, 80.0, 0.0, "-", 2795565.22], [1, "ANGELA MARINALVA DA SILVA", "064.413.304-07", "AUXILIAR DE COZINHA I", "Agosto", 2026, 2720.59, 742.72107, 217.64, 645.59, 425.0, 500.0, 80.0, 0.0, "-", 2795565.22], [1, "CAMILY CARNEIRO MARTINS", "401.124.028-10", "OPERADOR DE CAIXA", "Agosto", 2026, 3101.03, 802.4562000000001, 235.15, 0.0, 204.0, 0.0, 0.0, 0.0, "-", 2795565.22], [1, "CARLO LUCIO DODA", "220.584.498-94", "CONFEITEIRO", "Agosto", 2026, 3643.13, 0.0, 291.45, 989.88, 770.0, 0.0, 80.0, 0.0, "-", 2795565.22], [1, "CASSIA CECILIA GONZALEZ", "116.378.138-05", "AUXILIAR DE COZINHA I", "Agosto", 2026, 3480.48, 744.85047, 218.27, 68.49000000000001, 408.0, 100.0, 0.0, 0.0, 426.05, 2795565.22], [3, "CASSIA CRISTINE SOUZA PORTO DE PONTES", "376.754.668-02", "ENCARREGADO LOJA", "Agosto", 2026, 2821.57, 0.0, 0.0, 295.84, 870.0, 0.0, 80.0, 0.0, "-", 1998800.02], [1, "CIBELLE APARECIDA DE OLIVEIRA MARQUES", "346.718.368-90", "ACOUGUEIRO I", "Agosto", 2026, 2768.9, 735.6121500000002, 215.56, 220.99, 795.0, 0.0, 200.0, 0.0, "-", 2795565.22], [1, "CLAUDIANE ANDRIELI VIEIRA DA SILVA", "474.826.008-41", "OPERADOR DE CAIXA", "Agosto", 2026, 2501.34, 385.64526, 113.0, 0.0, 306.0, 0.0, 0.0, 0.0, "-", 2795565.22], [1, "CLAUDIUS GUSTAVO DA CRUZ", "475.827.508-45", "OPERADOR DE LOJA III", "Agosto", 2026, 2803.83, 754.94055, 221.22, 351.56, 408.0, 0.0, 0.0, 145.0, "-", 2795565.22], [1, "CRISLAINE BORGES DA COSTA", "436.016.748-23", "OPERADOR DE CAIXA", "Agosto", 2026, 2516.07, 660.0757800000001, 193.42, 183.07, 795.0, 100.0, 0.0, 0.0, "-", 2795565.22], [3, "CRISTIANO AKIRA TANAKA", "318.385.098-28", "AUXILIAR MANUTENCAO PREDIAL", "Agosto", 2026, 3138.31, 0.0, 250.84, 666.15, 770.0, 0.0, 80.0, 0.0, "-", 1998800.02], [1, "DAIANE DA SILVA RIBEIRO", "054.956.805-02", "FISCAL DE CAIXA", "Agosto", 2026, 2988.22, 813.12504, 238.27, 423.62, 625.0, 450.0, 80.0, 0.0, "-", 2795565.22], [3, "DANIEL ALAN GOMES SANTOS", "461.608.548-01", "CONFERENTE", "Agosto", 2026, 3251.42, 0.0, 260.11, 602.66, 425.0, 0.0, 80.0, 145.0, "-", 1998800.02], [1, "ELISAMA SIQUEIRA DA SILVA", "451.987.048-81", "COZINHEIRO MASTER", "Agosto", 2026, 4466.6, 868.10451, 254.38, 701.63, 425.0, 150.0, 0.0, 0.0, "-", 2795565.22], [1, "DANILO NUNES DOS SANTOS GOMES", "505.640.918-98", "ENCARREGADO DE AÇOUGUE", "Agosto", 2026, 3357.4, 0.0, 259.16, 385.76, 858.0, 600.0, 200.0, 0.0, "-", 2795565.22], [1, "ELIZIANE MARCIA DE BARROS LORENCO PAGANINI", "144.960.028-09", "OPERADOR DE CAIXA", "Agosto", 2026, 2805.38, 738.72435, 216.47, 472.38, 544.0, 0.0, 0.0, 0.0, 369.4, 2795565.22], [1, "ESTELA GREGORIO", "589.118.508-37", "OPERADOR DE LOJA I", "Agosto", 2026, 1677.11, 0.0, 0.0, 0.0, 646.0, 0.0, 0.0, 0.0, "-", 2795565.22], [2, "FABIO LUIZ VIEIRA", "156.572.408-98", "GERENTE DE LOJA", "Agosto", 2026, 5341.89, 0.0, 427.35, 441.89, 770.0, 0.0, 80.0, 145.0, "-", 2204782.56], [1, "GILDENES VIEIRA ALVES", "150.546.458-70", "OPERADOR DE CAIXA", "Agosto", 2026, 2695.28, 732.1259400000001, 214.54, 361.97, 425.0, 200.0, 80.0, 0.0, "-", 2795565.22], [1, "GIOVANNA LAUREN RODRIGUES", "478.850.568-13", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2246.08, 608.88009, 178.42, 171.08, 425.0, 0.0, 0.0, 0.0, 369.4, 2795565.22], [3, "GISLAINE APARECIDA CARLINO", "122.619.848-12", "FISCAL DE CAIXA", "Agosto", 2026, 3252.23, 0.0, 260.17, 687.63, 625.0, 150.0, 80.0, 145.0, "-", 1998800.02], [1, "GUILHERME MATEUS CORREA VICENTE PAULA SANTOS", "366.613.478-56", "ACOUGUEIRO I", "Agosto", 2026, 5533.05, 479.25969, 140.44, 0.0, 795.0, 0.0, 200.0, 0.0, "-", 2795565.22], [1, "ISAC LIMA DA SILVA", "113.202.423-40", "OPERADOR DE LOJA I", "Agosto", 2026, 2439.66, 625.4730300000001, 183.28, 364.66, 425.0, 300.0, 0.0, 0.0, "-", 2795565.22], [1, "GUILHERME HENRIQUE FERNANDES", "393.513.648-01", "GERENTE ADMINISTRATIVO", "Agosto", 2026, 6678.82, 0.0, 534.3, 0.0, 1500.0, 0.0, 80.0, 145.0, "-", 2795565.22], [1, "JAEL CASSIMIRO DA SILVA FERNANDES", "047.428.928-10", "OPERADOR DE CAIXA", "Agosto", 2026, 2609.72, 695.50026, 203.8, 276.40999999999997, 425.0, 150.0, 0.0, 145.0, "-", 2795565.22], [2, "GUILHERME SILVA ALBERTO", "486.621.038-98", "GERENTE DE PREVENÇÃO", "Agosto", 2026, 4457.46, 0.0, 356.59, 0.0, 2470.0, 0.0, 80.0, 0.0, "-", 2204782.56], [3, "GUSTAVO AUGUSTO CASTILHO DE SOUSA GOIS", "420.507.248-10", "GERENTE DE LOJA", "Agosto", 2026, 5314.17, 0.0, 425.13, 464.6700000000001, 500.0, 0.0, 80.0, 0.0, "-", 1998800.02], [1, "JOEL ROBSON IBBA JUNIOR", "414.600.188-93", "BALCONISTA DE ACOUGUE III", "Agosto", 2026, 2530.97, 686.28651, 201.1, 179.7, 795.0, 0.0, 280.0, 0.0, "-", 2795565.22], [1, "IGLEISSON BARBOSA DA SILVA", "365.515.108-09", "ANALISTA DE PREV E PERDAS", "Agosto", 2026, 2863.62, 0.0, 229.08, 474.08, 1434.0, 0.0, 80.0, 0.0, "-", 2795565.22], [1, "JOSE ARLAN DE FREITAS COELHO", "126.943.213-30", "OPERADOR DE LOJA I", "Agosto", 2026, 2294.73, 610.41981, 178.87, 219.73, 425.0, 0.0, 0.0, 0.0, "-", 2795565.22], [2, "INACIO BISPO DE LIMA MORAIS", "501.106.754-87", "ENCARREGADO DE AÇOUGUE", "Agosto", 2026, 3515.65, 0.0, 281.25, 544.01, 870.0, 0.0, 280.0, 0.0, "-", 2204782.56], [1, "JOSIANE APARECIDA FERREIRA", "025.639.159-96", "AUXILIAR DE COZINHA II", "Agosto", 2026, 2515.66, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2795565.22], [2, "IVAN APARECIDO RODRIGUES", "138.947.418-64", "GERENTE DE ACOUGUE", "Agosto", 2026, 4982.95, 0.0, 398.63, 380.31, 1070.0, 0.0, 280.0, 145.0, "-", 2204782.56], [1, "JULIA REGINA AGUILERA", "596.107.618-01", "ASSISTENTE DE PREVENCAO", "Agosto", 2026, 2639.22, 720.50706, 211.13, 372.98, 789.0, 370.0, 80.0, 0.0, "-", 2795565.22], [1, "KAUAN EXPEDITO MORAES PENHA", "409.939.988-52", "OPERADOR DE LOJA I", "Agosto", 2026, 2657.56, 686.9417100000001, 201.3, 582.56, 425.0, 1100.0, 0.0, 0.0, "-", 2795565.22], [1, "JAQUELINE PINHEIRO IRENO", "348.680.358-19", "SERVICOS GERAIS", "Agosto", 2026, 2127.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2795565.22], [1, "KEVYN EDUARDO DOS SANTOS RIBEIRO", "474.746.488-30", "OPERADOR DE LOJA II", "Agosto", 2026, 2545.02, 675.9616500000001, 198.08, 361.87, 425.0, 1150.0, 0.0, 0.0, "-", 2795565.22], [1, "JONAS ALVES DE PAULA", "404.556.698-80", "COMPRADOR I", "Agosto", 2026, 2821.48, 0.0, 225.71, 168.23, 1364.0, 0.0, 80.0, 145.0, "-", 2795565.22], [1, "LUCILENE DE MEIRA", "267.273.128-42", "OPERADOR DE CAIXA", "Agosto", 2026, 3492.49, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2795565.22], [1, "LUIS FELIPE MULLER RAPOSO", "571.750.418-70", "OPERADOR DE LOJA I", "Agosto", 2026, 1879.15, 499.87665, 146.48, 219.15, 646.0, 0.0, 0.0, 0.0, 369.4, 2795565.22], [2, "KASILEY PRISCILA MORENO BERMONTE FARIA", "491.834.448-82", "COMPRADOR I", "Agosto", 2026, 2837.97, 0.0, 227.03, 184.72, 1364.0, 0.0, 80.0, 145.0, "-", 2204782.56], [1, "LUIZA RHENATA OLIVEIRA LIMA", "556.540.998-50", "OPERADOR DE CAIXA", "Agosto", 2026, 2608.11, 712.01403, 208.64, 274.8, 425.0, 0.0, 0.0, 0.0, 369.4, 2795565.22], [1, "MAISA REGIANE ZANCHETA ZANIQUELLI", "202.566.898-81", "OPERADOR DE CAIXA", "Agosto", 2026, 928.85, 250.25364, 73.33, 151.18, 323.0, 0.0, 0.0, "-", "-", 2795565.22], [1, "LEANDRO ANTONIO DA SILVA MEDEIROS", "474.826.078-54", "ENCARREGADO DE AÇOUGUE", "Agosto", 2026, 3973.59, 0.0, 313.62, 501.94999999999993, 500.0, 0.0, 200.0, 145.0, 369.4, 2795565.22], [1, "MARIA ANTONIA DA CRUZ MEIRA", "472.874.068-45", "BALCONISTA DE ACOUGUE III", "Agosto", 2026, 2357.21, 636.60324, 186.55, 5.94, 425.0, 0.0, 200.0, 0.0, "-", 2795565.22], [1, "MAYCON VINICIUS DE CAMARGO SILVA", "492.064.318-70", "OPERADOR DE LOJA III", "Agosto", 2026, 2903.24, 781.7027400000001, 229.07, 383.74, 425.0, 0.0, 0.0, 0.0, "-", 2795565.22], [2, "LUIS ROBERTO DE OLIVEIRA", "122.646.518-81", "ENCARREGADO LOJA", "Agosto", 2026, 3090.07, 0.0, 247.2, 0.0, 425.0, 0.0, 80.0, 145.0, "-", 2204782.56], [1, "MILENE DE FATIMA DA CONCEICAO", "524.925.268-01", "BALCONISTA DE PADARIA I", "Agosto", 2026, 2273.11, 619.2213300000001, 181.45, 198.11, 425.0, 0.0, 0.0, 0.0, "-", 2795565.22], [1, "MIRNA LIZ DE CARVALHO BRAGATTI", "256.771.438-39", "OPERADOR DE CAIXA", "Agosto", 2026, 2524.22, 688.50327, 201.75, 191.22, 425.0, 466.0, 0.0, 0.0, "-", 2795565.22], [1, "MADSON MATHIAS CARRARA", "477.617.798-64", "GERENTE COMERCIAL", "Agosto", 2026, 4605.25, 0.0, 368.42, 0.0, 1360.0, 0.0, 80.0, 1160.0, "-", 2795565.22], [1, "NICOLAS GABRIEL SABINO DA SILVA", "108.282.193-46", "OPERADOR DE CAIXA", "Agosto", 2026, 2779.86, 758.4021900000001, 222.24, 446.86, 425.0, 350.0, 0.0, 0.0, "-", 2795565.22], [3, "MARGARENE BARROS BORGES", "221.298.678-55", "FISCAL DE CAIXA", "Agosto", 2026, 4089.98, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 145.0, "-", 1998800.02], [1, "RENAN SILVA DE ALMEIDA", "570.067.088-77", "CONFERENTE", "Agosto", 2026, 7007.04, 1116.39801, 327.14, 9.43, 500.0, 200.0, 80.0, 145.0, "-", 2795565.22], [1, "MARIA ESTEFANY CAMILA ALBINO LOPES", "529.579.158-04", "ENCARREGADO LOJA", "Agosto", 2026, 2821.57, 0.0, 0.0, 286.87, 500.0, 300.0, 80.0, 0.0, "-", 2795565.22], [1, "ROBERT MARCELUS", "241.068.908-60", "OPERADOR DE LOJA I", "Agosto", 2026, 2483.88, 662.65017, 194.18, 408.88, 425.0, 0.0, 80.0, 0.0, "-", 2795565.22], [2, "MARIA HELENA ARDUINO DOS SANTOS", "150.573.118-67", "COORDENADORA DE RH", "Agosto", 2026, 4404.05, 0.0, 0.0, 226.06, 770.0, 0.0, 80.0, 580.0, "-", 2204782.56], [1, "SANDRA SANTOS GONSALES", "091.327.368-60", "AUXILIAR DE COZINHA II", "Agosto", 2026, 3171.23, 865.74579, 253.69, 819.96, 425.0, 250.0, 80.0, 0.0, 369.4, 2795565.22], [1, "TATIANE EMILIA DOS SANTOS", "705.006.894-23", "AUXILIAR DE COZINHA I", "Agosto", 2026, 2578.94, 660.0512100000001, 193.42, 503.94, 408.0, 100.0, 0.0, 0.0, "-", 2795565.22], [1, "TEREZA SONIA ASCENCIO", "110.984.168-05", "OPERADOR DE CAIXA", "Agosto", 2026, 2643.33, 698.1374400000001, 204.58, 310.02, 408.0, 0.0, 0.0, 145.0, "-", 2795565.22], [1, "THULIO LUIZ BRISOLA NANIAS", "559.511.998-59", "OPERADOR DE LOJA I", "Agosto", 2026, 2291.37, 625.07991, 183.17, 216.37, 425.0, 0.0, 80.0, 0.0, 369.4, 2795565.22], [1, "PAMELA DE OLIVEIRA ALMEIDA", "472.930.158-79", "FISCAL DE CAIXA", "Agosto", 2026, 2463.6, 0.0, 0.0, 331.32, 608.0, 670.0, 0.0, 145.0, "-", 2795565.22], [1, "VALERIA APARECIDA ANTUNES RAMOS", "359.136.938-17", "BALCONISTA DE PADARIA III", "Agosto", 2026, 2628.62, 717.61326, 210.28, 277.34999999999997, 425.0, 0.0, 0.0, 0.0, "-", 2795565.22], [3, "RAFAEL APARICIO SOARES DE OLIVEIRA", "518.982.988-07", "CONFERENTE", "Agosto", 2026, 3357.48, 0.0, 268.59, 708.72, 795.0, 0.0, 80.0, 145.0, "-", 1998800.02], [1, "VANESSA APARECIDA BRAGA", "331.987.008-41", "ENCARREGADO DE PADARIA", "Agosto", 2026, 2849.92, 775.6667100000001, 227.3, 411.39, 725.0, 300.0, 80.0, 145.0, "-", 2795565.22], [1, "RAPHAELLA BUARQUE FONSECA", "126.668.717-38", "FISCAL DE CAIXA", "Agosto", 2026, 3572.07, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "-", 2795565.22], [1, "VICTOR HUGO FERNANDES GARIBALDI", "069.522.501-40", "BALCONISTA DE ACOUGUE III", "Agosto", 2026, 2818.71, 768.6315000000001, 225.24, 467.44000000000005, 425.0, 350.0, 0.0, 0.0, 369.4, 2795565.22], [3, "RENATA PEREIRA", "110.301.088-38", "FISCAL DE CAIXA", "Agosto", 2026, 8339.14, 0.0, 231.92, 117.83, 625.0, 0.0, 80.0, 145.0, "-", 1998800.02], [1, "VILANEIDE EMIDIA CAMPOS ILLANES", "083.308.558-13", "OPERADOR DE CAIXA", "Agosto", 2026, 2561.2, 697.87809, 204.5, 227.89, 357.0, 0.0, 0.0, 145.0, "-", 2795565.22], [1, "YUDI RAMOS SOARES", "554.947.808-05", "OPERADOR DE LOJA I", "Agosto", 2026, 2277.57, 571.74663, 167.54, 202.56999999999994, 425.0, 0.0, 0.0, 0.0, "-", 2795565.22], [3, "ROGERIO ALEXANDRE ALVES DE OLIVEIRA", "110.278.238-66", "ENCARREGADO LOJA", "Agosto", 2026, 3551.33, 0.0, 284.1, 729.76, 870.0, 150.0, 80.0, 145.0, "-", 1998800.02], [1, "RONALDO MARTINS FERREIRA FILHO", "466.562.938-24", "ENCARREGADO HORTIFRUTI", "Agosto", 2026, 5439.16, 0.0, 297.93, 0.0, 0.0, 0.0, 0.0, 145.0, "-", 2795565.22], [1, "ZURILEIDYS NUNEZ DIAZ", "106.680.198-32", "OPERADOR DE CAIXA", "Agosto", 2026, 2614.46, 713.7475800000001, 209.15, 281.46000000000004, 425.0, 350.0, 80.0, 0.0, "-", 2795565.22], [1, "SERGIO DOS SANTOS MARQUES", "260.447.608-80", "GERENTE DE LOJA", "Agosto", 2026, 7131.94, 0.0, 570.55, 0.0, 2098.0, 0.0, 80.0, 870.0, "-", 2795565.22], [1, "SEVERINO ANTONIO SALES", "092.449.734-30", "ACOUGUEIRO II", "Agosto", 2026, 2650.0, 0.0, 0.0, 219.17, 425.0, 150.0, 200.0, 0.0, "-", 2795565.22], [1, "SILVANA DOMINGUES RODRIGUES", "336.366.908-92", "ASSISTENTE ADM", "Agosto", 2026, 2886.39, 0.0, 230.91, 422.79, 770.0, 0.0, 80.0, 0.0, "-", 2795565.22], [2, "TATIANE APARECIDA DE OLIVEIRA", "418.807.718-29", "FISCAL DE CAIXA", "Agosto", 2026, 3114.08, 0.0, 249.12, 549.48, 770.0, 375.0, 80.0, 0.0, "-", 2204782.56], [3, "TATIANE DE SOUZA", "282.317.498-29", "ASSISTENTE ADM", "Agosto", 2026, 2878.62, 0.0, 230.28, 415.02000000000004, 425.0, 0.0, 80.0, 145.0, 369.4, 1998800.02], [1, "VANDRE VINICIUS DODA", "355.214.488-96", "BALCONISTA DE ACOUGUE III", "Agosto", 2026, 3256.66, 0.0, 260.53, 440.18, 719.0, 0.0, 200.0, 435.0, "-", 2795565.22], [3, "FABRICIO HENRIQUE DOS SANTOS SILVA", "609.679.368-10", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 1998800.02], [3, "JUAN MUCI SEVILHA", "551.244.208-20", "OPERADOR DE LOJA I", "Agosto", 2026, 1326.82, 156.83031, 45.95, 297.8, "-", "-", "-", "-", "-", 1998800.02], [3, "MIGUEL PAINI QUIRINO", "545.290.378-00", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 1998800.02], [3, "PEDRO HENRYQUE COSTA SANTOS", "597.047.918-79", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 1998800.02], [2, "MATEUS HENRIQUE SANTOS DE LIMA", "461.276.378-56", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 182.2, "-", "-", "-", "-", "-", 2204782.56], [2, "RENAN RUBENS SILVA DE JESUS", "591.431.088-14", "OPERADOR DE LOJA I", "Agosto", 2026, 1826.72, 379.74846, 111.28, 76.85, "-", "-", "-", "-", 369.4, 2204782.56], [1, "VANIA LUCIA ROSA DODA", "362.944.938-70", "SERVICOS GERAIS", "Agosto", 2026, 2561.66, 0.0, 204.93, 0.0, "-", "-", "-", 435.0, "-", 2795565.22], [1, "PEDRO HENRIQUE RODRIGUES AIZZA", "563.286.128-77", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 112.37, "-", "-", "-", "-", 369.4, 2795565.22], [1, "LUCAS EMANOEL DE JESUS", "572.413.438-16", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 115.15, "-", "-", "-", "-", "-", 2795565.22], [1, "KEVIN GABRIEL TOBIAS MAZARO", "482.116.438-20", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 115.45, "-", "-", "-", "-", "-", 2795565.22], [1, "GABRIEL OLIVERIA CASAGRANDE", "514.336.328-45", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 133.97, "-", "-", "-", "-", "-", 2795565.22], [2, "MICHAEL PIETRO SILVA", "550.347.528-32", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 112.8, "-", "-", "-", "-", 369.4, 2204782.56], [2, "JENYFER PONTES", "589.264.478-20", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 166.67, "-", "-", "-", "-", 369.4, 2204782.56], [2, "GABRIEL ROSCHA FERREIRA DOS SANTOS", "585.193.418-29", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 136.07, "-", "-", "-", "-", "-", 2204782.56], [2, "GABRIEL ALVES DOS SANTOS", "472.768.218-62", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 151.97, "-", "-", "-", "-", "-", 2204782.56], [2, "CAUA BITTAR DE ALMEIDA", "493.984.638-57", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 180.0, "-", "-", "-", "-", 345.8, 2204782.56], [2, "DIOGO PINEDA DE ALMEIDA", "544.176.546-81", "OPERADOR DE LOJA I", "Agosto", 2026, 820.0, 0.0, 0.0, 130.3, "-", "-", "-", "-", "-", 2204782.56], [2, "ADRIANA FERNANDES DE CAMARGO", "325.381.758-01", "OPERADOR DE CAIXA", "Agosto", 2026, 1465.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 2204782.56], [2, "GABRIEL FERREIRA", 339784585, "OPERADOR DE LOJA I", "Agosto", 2026, 987.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 2204782.56], [3, "CAROLINY BEATRIZ MUNIZ DE ANDRADE", 676548726, "OPERADOR DE LOJA I", "Agosto", 2026, 978.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 1998800.02], [1, "LUCIANA FEITOSA", "476.500.416-87", "BALCONISTA DE PADARIA I", "Agosto", 2026, 1245.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 2795565.22], [1, "JOAO PEDRO SANTOS", 633835464, "OPERADOR DE LOJA I", "Agosto", 2026, 915.0, 0.0, 0.0, 0.0, "-", "-", "-", "-", "-", 2795565.22], [1, "FRANCISCO CARLOS DODA", "753.053.648-68", "SERVICOS GERAIS", "Agosto", 2026, 2797.92, 0.0, 0.0, 0.0, "-", "-", "-", 435.0, "-", 2795565.22]];
+
+const currencyCols = [6,7,8,9,10,11,12,13,14,15];
+const numCols = [0,4,5];
+
+let filtered = [...allRows];
+let sortCol = -1, sortDir = 1;
+let currentPage = 1;
+
+// Populate function filter
+const funcoes = [...new Set(allRows.map(r => r[3]))].sort();
+const sel = document.getElementById('filterFuncao');
+funcoes.forEach(f => {
+  const o = document.createElement('option');
+  o.value = f; o.textContent = f;
+  sel.appendChild(o);
+});
+
+function formatCurrency(v) {
+  if (v === '-' || v === '' || isNaN(v)) return '-';
+  const n = parseFloat(v);
+  return n.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+}
+
+function buildHeader() {
+  const tr = document.getElementById('headerRow');
+  tr.innerHTML = '';
+  columns.forEach((col, i) => {
+    const th = document.createElement('th');
+    th.innerHTML = col + '<span class="sort-arrow">⇅</span>';
+    th.onclick = () => { sortTable(i); };
+    tr.appendChild(th);
+  });
+}
+
+function renderTable() {
+  const ps = parseInt(document.getElementById('pageSize').value);
+  const totalPages = Math.ceil(filtered.length / ps);
+  if (currentPage > totalPages) currentPage = 1;
+  const start = (currentPage - 1) * ps;
+  const pageRows = filtered.slice(start, start + ps);
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  pageRows.forEach(row => {
+    const tr = document.createElement('tr');
+    row.forEach((val, i) => {
+      const td = document.createElement('td');
+      if (i === 0) {
+        td.innerHTML = '<span class="loja-badge">' + val + '</span>';
+      } else if (currencyCols.includes(i)) {
+        td.className = 'currency';
+        td.textContent = formatCurrency(val);
+      } else if (numCols.includes(i)) {
+        td.className = 'num';
+        td.textContent = val;
+      } else {
+        td.textContent = val;
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('statsBar').textContent =
+    'Exibindo ' + pageRows.length + ' de ' + filtered.length + ' registros' +
+    (filtered.length < allRows.length ? ' (filtrado de ' + allRows.length + ' total)' : '');
+
+  // Pagination
+  const pag = document.getElementById('pagination');
+  pag.innerHTML = '';
+  if (totalPages <= 1) return;
+  const btnPrev = document.createElement('button');
+  btnPrev.textContent = '◀';
+  btnPrev.disabled = currentPage === 1;
+  btnPrev.onclick = () => { currentPage--; renderTable(); };
+  pag.appendChild(btnPrev);
+  for (let p = 1; p <= totalPages; p++) {
+    const b = document.createElement('button');
+    b.textContent = p;
+    b.className = p === currentPage ? 'active' : '';
+    b.onclick = () => { currentPage = p; renderTable(); };
+    pag.appendChild(b);
+  }
+  const btnNext = document.createElement('button');
+  btnNext.textContent = '▶';
+  btnNext.disabled = currentPage === totalPages;
+  btnNext.onclick = () => { currentPage++; renderTable(); };
+  pag.appendChild(btnNext);
+}
+
+function applyFilters() {
+  const loja = document.getElementById('filterLoja').value;
+  const funcao = document.getElementById('filterFuncao').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  filtered = allRows.filter(row => {
+    if (loja && String(row[0]) !== loja) return false;
+    if (funcao && row[3] !== funcao) return false;
+    if (search && !row.some(v => String(v).toLowerCase().includes(search))) return false;
+    return true;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+function sortTable(colIdx) {
+  if (sortCol === colIdx) {
+    sortDir *= -1;
+  } else {
+    sortCol = colIdx;
+    sortDir = 1;
+  }
+  filtered.sort((a, b) => {
+    let va = a[colIdx], vb = b[colIdx];
+    if (currencyCols.includes(colIdx) || numCols.includes(colIdx)) {
+      va = parseFloat(va) || 0;
+      vb = parseFloat(vb) || 0;
+      return (va - vb) * sortDir;
+    }
+    return String(va).localeCompare(String(vb), 'pt-BR') * sortDir;
+  });
+  renderTable();
+}
+
+buildHeader();
+applyFilters();
+</script>
+
+</body>
+</html>
