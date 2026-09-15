@@ -1,0 +1,2 @@
+# DetalhamentoColaborador
+Detalhamento
